@@ -23,22 +23,32 @@ jobs:
         run: mvn -B package
       - name: Package application
         run: |
-          jpackage --input target \
-                   --name ChatDelta \
-                   --main-jar chatdelta-java-0.1.0.jar \
-                   --main-class com.chatdelta.Main \
-                   --type app-image \
-                   --dest dist
+          mkdir -p dist/ChatDelta
+          cp target/chatdelta-java-*.jar dist/ChatDelta/ChatDelta.jar
+          cp README.md dist/ChatDelta/
+          cp LICENSE dist/ChatDelta/
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            echo "@echo off" > dist/ChatDelta/ChatDelta.bat
+            echo "java -jar \"%~dp0ChatDelta.jar\" %*" >> dist/ChatDelta/ChatDelta.bat
+          else
+            echo "#!/bin/bash" > dist/ChatDelta/ChatDelta.sh
+            echo "java -jar \"\$(dirname \"\$0\")/ChatDelta.jar\" \"\$@\"" >> dist/ChatDelta/ChatDelta.sh
+            chmod +x dist/ChatDelta/ChatDelta.sh
+          fi
         shell: bash
       - name: Archive package
         run: |
-          tar -czf ChatDelta-${{ matrix.os }}.tar.gz -C dist ChatDelta
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            cd dist && zip -r ../ChatDelta-${{ matrix.os }}.zip ChatDelta
+          else
+            tar -czf ChatDelta-${{ matrix.os }}.tar.gz -C dist ChatDelta
+          fi
         shell: bash
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ChatDelta-${{ matrix.os }}
-          path: ChatDelta-${{ matrix.os }}.tar.gz
+          path: ChatDelta-${{ matrix.os }}.*
 
   release:
     needs: build
@@ -50,4 +60,6 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: artifacts/**/*.tar.gz
+          files: |
+            artifacts/**/*.tar.gz
+            artifacts/**/*.zip
