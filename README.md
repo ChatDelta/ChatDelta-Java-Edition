@@ -4,11 +4,12 @@ Java implementation of ChatDelta - a TUI application for querying multiple AI AP
 
 ## Features
 
-- 🎯 Query multiple AI providers simultaneously (OpenAI, Google Gemini, Anthropic Claude)
-- 📊 Side-by-side response comparison in a terminal UI
-- 🔍 Delta analysis showing differences between responses
-- ⌨️ Interactive terminal interface with keyboard navigation
+- 🎯 Query multiple AI providers simultaneously (OpenAI, Google Gemini 2.5, Anthropic Claude)
+- 📊 Side-by-side response comparison in a Swing GUI
+- 🔍 Compare responses from different AI models
+- 🖱️ User-friendly graphical interface
 - 🔐 Automatic provider detection based on API keys
+- 🚀 Now using Gemini 2.5 Flash - Google's latest and most advanced Flash model
 
 ## Prerequisites
 

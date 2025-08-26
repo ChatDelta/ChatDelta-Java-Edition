@@ -44,7 +44,7 @@ public class BasicTest {
         
         AIClient gemini = new GeminiClient("test-key");
         assertNotNull(gemini);
-        assertEquals("Gemini", gemini.getProviderName());
+        assertEquals("Gemini (2.5 Flash)", gemini.getProviderName());
         
         AIClient claude = new ClaudeClient("test-key");
         assertNotNull(claude);
