@@ -21,29 +21,29 @@ jobs:
           cache: 'maven'
       - name: Build with Maven
         run: mvn -B package
-      - name: Package application
+      - name: Package application (Unix)
+        if: matrix.os != 'windows-latest'
         run: |
           mkdir -p dist/ChatDelta
           cp target/chatdelta-java-*.jar dist/ChatDelta/ChatDelta.jar
           cp README.md dist/ChatDelta/
           cp LICENSE dist/ChatDelta/
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            echo "@echo off" > dist/ChatDelta/ChatDelta.bat
-            echo "java -jar \"%~dp0ChatDelta.jar\" %*" >> dist/ChatDelta/ChatDelta.bat
-          else
-            echo "#!/bin/bash" > dist/ChatDelta/ChatDelta.sh
-            echo "java -jar \"\$(dirname \"\$0\")/ChatDelta.jar\" \"\$@\"" >> dist/ChatDelta/ChatDelta.sh
-            chmod +x dist/ChatDelta/ChatDelta.sh
-          fi
+          echo "#!/bin/bash" > dist/ChatDelta/ChatDelta.sh
+          echo "java -jar \"\$(dirname \"\$0\")/ChatDelta.jar\" \"\$@\"" >> dist/ChatDelta/ChatDelta.sh
+          chmod +x dist/ChatDelta/ChatDelta.sh
+          tar -czf ChatDelta-${{ matrix.os }}.tar.gz -C dist ChatDelta
         shell: bash
-      - name: Archive package
+      
+      - name: Package application (Windows)
+        if: matrix.os == 'windows-latest'
         run: |
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cd dist && zip -r ../ChatDelta-${{ matrix.os }}.zip ChatDelta
-          else
-            tar -czf ChatDelta-${{ matrix.os }}.tar.gz -C dist ChatDelta
-          fi
-        shell: bash
+          New-Item -ItemType Directory -Force -Path dist\ChatDelta
+          Copy-Item target\chatdelta-java-*.jar dist\ChatDelta\ChatDelta.jar
+          Copy-Item README.md dist\ChatDelta\
+          Copy-Item LICENSE dist\ChatDelta\
+          "@echo off`njava -jar `"%~dp0ChatDelta.jar`" %*" | Out-File -FilePath dist\ChatDelta\ChatDelta.bat -Encoding ASCII
+          Compress-Archive -Path dist\ChatDelta -DestinationPath ChatDelta-${{ matrix.os }}.zip
+        shell: pwsh
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
